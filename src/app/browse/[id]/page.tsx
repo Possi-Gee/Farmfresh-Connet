@@ -40,14 +40,16 @@ async function getProduceById(id: string): Promise<Produce | null> {
 }
 
 
-export default function ProductDetailPage({ params: {id} }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
     const [product, setProduct] = useState<Produce | null>(null);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const id = params.id;
 
     useEffect(() => {
+        if (!id) return;
         const fetchProduct = async () => {
             setLoading(true);
             const productData = await getProduceById(id);
