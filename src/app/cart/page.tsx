@@ -3,7 +3,7 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, doc, deleteDoc, addDoc, writeBatch, serverTimestamp } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, deleteDoc, addDoc, writeBatch, serverTimestamp, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -262,5 +262,3 @@ export default function CartPage() {
         </div>
     )
 }
-
-    
