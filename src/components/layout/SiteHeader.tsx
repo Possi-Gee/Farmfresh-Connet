@@ -1,19 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Leaf, Menu } from "lucide-react";
+import { Leaf, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "../ui/skeleton";
 
 export function SiteHeader() {
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/sign-in');
+  };
 
   const navLinks = [
     { href: "/", label: "Browse" },
     { href: "/dashboard/tips", label: "Farming Tips" },
-    { href: "/dashboard", label: "Dashboard" },
   ];
+
+  if (user) {
+    navLinks.push({ href: "/dashboard", label: "Dashboard" });
+  }
 
   const NavLinks = () => (
     <>
@@ -24,6 +39,58 @@ export function SiteHeader() {
       ))}
     </>
   );
+
+  const AuthButtons = () => {
+    if (loading) {
+      return <div className="flex gap-2"><Skeleton className="h-10 w-20" /><Skeleton className="h-10 w-20" /></div>;
+    }
+
+    if (user) {
+      return (
+        <Button variant="ghost" onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign Out
+        </Button>
+      );
+    }
+
+    return (
+      <>
+        <Button variant="ghost" asChild>
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/sign-up">Sign Up</Link>
+        </Button>
+      </>
+    );
+  };
+  
+  const MobileAuthButtons = () => {
+    if (loading) {
+      return <div className="flex flex-col gap-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>;
+    }
+  
+    if (user) {
+      return (
+        <Button variant="outline" onClick={() => { handleSignOut(); setMenuOpen(false); }}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign Out
+        </Button>
+      );
+    }
+  
+    return (
+      <>
+        <Button variant="outline" asChild>
+          <Link href="/sign-in" onClick={() => setMenuOpen(false)}>Sign In</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/sign-up" onClick={() => setMenuOpen(false)}>Sign Up</Link>
+        </Button>
+      </>
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -43,12 +110,7 @@ export function SiteHeader() {
         
         <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="hidden md:flex">
-            <Button variant="ghost" asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/sign-up">Sign Up</Link>
-            </Button>
+            <AuthButtons />
           </div>
 
           <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
@@ -60,7 +122,7 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right">
               <SheetHeader>
-                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
               <Link href="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
                 <Leaf className="mr-2 h-6 w-6 text-primary" />
@@ -69,12 +131,7 @@ export function SiteHeader() {
               <div className="mt-6 flex flex-col space-y-4">
                 <NavLinks />
                 <div className="border-t pt-4 flex flex-col space-y-2">
-                  <Button variant="outline" asChild>
-                    <Link href="/sign-in" onClick={() => setMenuOpen(false)}>Sign In</Link>
-                  </Button>
-                  <Button asChild>
-                    <Link href="/sign-up" onClick={() => setMenuOpen(false)}>Sign Up</Link>
-                  </Button>
+                  <MobileAuthButtons />
                 </div>
               </div>
             </SheetContent>
