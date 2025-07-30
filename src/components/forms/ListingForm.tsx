@@ -9,6 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 
 const categories = ["Vegetables", "Fruits", "Grains", "Tubers", "Spices", "Other"];
 
@@ -20,7 +29,7 @@ const formSchema = z.object({
   quantity: z.coerce.number().int().positive("Quantity must be a positive number."),
   unit: z.string().min(1, "Please specify a unit (e.g., kg, crate, bunch)."),
   location: z.string().min(3, "Please enter a location."),
-  imageType: z.enum(["url", "upload"]).default("upload"),
+  imageType: z.enum(["upload", "url"]).default("upload"),
   imageUrl: z.string().url("Please provide a valid URL.").optional().or(z.literal('')),
   imageFile: z.any().optional(),
 }).refine(data => {
@@ -37,6 +46,11 @@ const formSchema = z.object({
 });
 
 export function ListingForm() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,9 +67,48 @@ export function ListingForm() {
 
   const imageType = form.watch("imageType");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Handle form submission (e.g., upload to Firestore/Storage)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to create a listing.", variant: "destructive" });
+        return;
+    }
+    setLoading(true);
+
+    try {
+        let imageUrl = values.imageUrl || '';
+        
+        if (values.imageType === 'upload' && values.imageFile?.length > 0) {
+            const file = values.imageFile[0];
+            const storage = getStorage();
+            const storageRef = ref(storage, `listings/${user.uid}/${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            imageUrl = await getDownloadURL(snapshot.ref);
+        }
+
+        await addDoc(collection(db, "listings"), {
+            farmerId: user.uid,
+            farmerName: user.displayName,
+            productName: values.productName,
+            description: values.description,
+            category: values.category,
+            price: values.price,
+            quantity: values.quantity,
+            unit: values.unit,
+            location: values.location,
+            imageUrl: imageUrl,
+            createdAt: serverTimestamp(),
+            status: "Active",
+        });
+
+        toast({ title: "Success!", description: "Your listing has been created." });
+        router.push("/dashboard/listings");
+
+    } catch (error) {
+        console.error("Error creating listing:", error);
+        toast({ title: "Error", description: "Failed to create listing. Please try again.", variant: "destructive" });
+    } finally {
+        setLoading(false);
+    }
   }
 
   return (
@@ -214,7 +267,10 @@ export function ListingForm() {
           )}
         />
         
-        <Button type="submit">Create Listing</Button>
+        <Button type="submit" disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create Listing
+        </Button>
       </form>
     </Form>
   );

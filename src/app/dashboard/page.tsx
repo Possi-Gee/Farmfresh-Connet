@@ -5,9 +5,33 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardOverviewPage() {
   const { user } = useAuth();
+  const [listingCount, setListingCount] = useState(0);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    if (user?.accountType === 'farmer' && user.uid) {
+      const fetchListings = async () => {
+        try {
+          setLoadingStats(true);
+          const q = query(collection(db, "listings"), where("farmerId", "==", user.uid));
+          const querySnapshot = await getDocs(q);
+          setListingCount(querySnapshot.size);
+        } catch (error) {
+          console.error("Error fetching listings count:", error);
+        } finally {
+          setLoadingStats(false);
+        }
+      };
+      fetchListings();
+    }
+  }, [user]);
 
   if (user?.accountType === 'buyer') {
     return (
@@ -48,7 +72,7 @@ export default function DashboardOverviewPage() {
             <CardDescription>Number of active produce listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold">5</p>
+            {loadingStats ? <Skeleton className="h-10 w-1/4" /> : <p className="text-4xl font-bold">{listingCount}</p>}
           </CardContent>
         </Card>
         <Card>
@@ -57,7 +81,7 @@ export default function DashboardOverviewPage() {
             <CardDescription>Views across all your listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold">1,234</p>
+            <p className="text-4xl font-bold">0</p>
           </CardContent>
         </Card>
         <Card>
@@ -66,7 +90,7 @@ export default function DashboardOverviewPage() {
             <CardDescription>New messages from buyers.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold">12</p>
+            <p className="text-4xl font-bold">0</p>
           </CardContent>
         </Card>
       </div>
