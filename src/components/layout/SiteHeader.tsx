@@ -1,7 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
-import { Leaf, Menu, LogOut, ShoppingCart } from "lucide-react";
+import { Leaf, Menu, LogOut, ShoppingCart, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -22,13 +23,17 @@ export function SiteHeader() {
   };
 
   const navLinks = [
-    { href: "/", label: "Browse" },
-    { href: "/dashboard/tips", label: "Farming Tips" },
+    { href: "/", label: "Browse", roles: ['buyer', 'farmer', null] }, // null for logged out
   ];
 
-  if (user) {
-    navLinks.push({ href: "/dashboard", label: "Dashboard" });
+  if (user?.accountType === 'farmer') {
+    navLinks.push({ href: "/dashboard/tips", label: "Farming Tips", roles: ['farmer'] });
   }
+  
+  if (user) {
+    navLinks.push({ href: "/dashboard", label: "Dashboard", roles: ['buyer', 'farmer'] });
+  }
+
 
   const NavLinks = ({ inSheet }: { inSheet?: boolean }) => (
     <>
