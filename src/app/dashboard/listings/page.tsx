@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal } from "lucide-react";
+import { Eye, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,6 +22,7 @@ interface Listing extends DocumentData {
     status: string;
     price: number;
     quantity: number;
+    viewCount: number;
 }
 
 export default function MyListingsPage() {
@@ -77,6 +78,7 @@ export default function MyListingsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Quantity</TableHead>
+                <TableHead className="text-center">Views</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
             </TableHeader>
@@ -89,6 +91,7 @@ export default function MyListingsPage() {
                     </TableCell>
                     <TableCell>GH₵{listing.price.toFixed(2)}</TableCell>
                     <TableCell>{listing.quantity}</TableCell>
+                    <TableCell className="text-center">{listing.viewCount || 0}</TableCell>
                     <TableCell>
                     <AlertDialog>
                         <DropdownMenu>
@@ -100,6 +103,11 @@ export default function MyListingsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                               <Link href={`/browse/${listing.id}`}>
+                                <Eye className="mr-2 h-4 w-4" /> View
+                               </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem>Edit</DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>
@@ -138,3 +146,5 @@ export default function MyListingsPage() {
     </Card>
   );
 }
+
+    

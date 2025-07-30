@@ -1,3 +1,4 @@
+
 import { ProductCard } from "@/components/ProductCard";
 import { FilterSidebar } from "@/components/FilterSidebar";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export type Produce = {
     hint: string;
     description?: string;
     phoneNumber?: string;
+    viewCount?: number;
 };
 
 async function getProduce(): Promise<Produce[]> {
@@ -40,6 +42,7 @@ async function getProduce(): Promise<Produce[]> {
       description: data.description || '',
       phoneNumber: data.phoneNumber || '',
       hint: data.productName.toLowerCase(), // Use product name for hint
+      viewCount: data.viewCount || 0,
     });
   });
   return produceList;
@@ -81,5 +84,7 @@ export default async function Home() {
     </div>
   );
 }
+
+    
 
     

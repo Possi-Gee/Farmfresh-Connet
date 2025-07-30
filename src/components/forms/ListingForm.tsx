@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -101,6 +102,7 @@ export function ListingForm() {
             imageUrl: imageUrl,
             createdAt: serverTimestamp(),
             status: "Active",
+            viewCount: 0,
         });
 
         toast({ title: "Success!", description: "Your listing has been created." });
@@ -293,5 +295,7 @@ export function ListingForm() {
     </Form>
   );
 }
+
+    
 
     

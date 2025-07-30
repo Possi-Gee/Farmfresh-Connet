@@ -1,41 +1,83 @@
+
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, deleteDoc, addDoc, writeBatch, serverTimestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import type { Produce } from "@/app/page";
 
 interface CartItem {
     id: string;
+    productId: string;
     productName: string;
     price: number;
     unit: string;
     imageUrl: string;
     quantity: number;
+    farmerId: string; // Add farmerId to cart item
 }
+
+async function getProduceById(id: string): Promise<(Produce & { farmerId: string }) | null> {
+    const docRef = doc(db, "listings", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            name: data.productName,
+            category: data.category,
+            price: data.price,
+            unit: data.unit,
+            quantity: data.quantity,
+            location: data.location,
+            imageUrl: data.imageUrl,
+            farmer: data.farmerName || 'Anonymous Farmer',
+            description: data.description,
+            phoneNumber: data.phoneNumber,
+            hint: data.productName.toLowerCase(),
+            farmerId: data.farmerId,
+        };
+    } else {
+        return null;
+    }
+}
+
 
 export default function CartPage() {
     const { user, loading: authLoading } = useAuth();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const { toast } = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         if (user) {
             const q = query(collection(db, "cart", user.uid, "items"));
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const unsubscribe = onSnapshot(q, async (querySnapshot) => {
                 const items: CartItem[] = [];
-                querySnapshot.forEach((doc) => {
-                    items.push({ id: doc.id, ...doc.data() } as CartItem);
-                });
+                for (const itemDoc of querySnapshot.docs) {
+                    const itemData = itemDoc.data();
+                    const product = await getProduceById(itemData.productId);
+                    if (product) {
+                        items.push({ 
+                            id: itemDoc.id, 
+                            ...itemData,
+                            farmerId: product.farmerId,
+                        } as CartItem);
+                    }
+                }
                 setCartItems(items);
                 setLoading(false);
             }, (error) => {
@@ -59,6 +101,56 @@ export default function CartPage() {
             }
         }
     }
+
+    const handleCheckout = async () => {
+        if (!user || cartItems.length === 0) return;
+
+        setCheckoutLoading(true);
+
+        const ordersByFarmer = cartItems.reduce((acc, item) => {
+            (acc[item.farmerId] = acc[item.farmerId] || []).push(item);
+            return acc;
+        }, {} as Record<string, CartItem[]>);
+
+        try {
+            const batch = writeBatch(db);
+
+            for (const farmerId in ordersByFarmer) {
+                const farmerItems = ordersByFarmer[farmerId];
+                const total = farmerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+                const orderData = {
+                    buyerId: user.uid,
+                    buyerName: user.displayName || 'Anonymous Buyer',
+                    farmerId: farmerId,
+                    items: farmerItems.map(({ id, ...rest }) => rest), // remove cart item id
+                    total,
+                    status: "Pending",
+                    createdAt: serverTimestamp(),
+                };
+                const orderRef = doc(collection(db, "orders"));
+                batch.set(orderRef, orderData);
+            }
+            
+            // Clear the cart
+            cartItems.forEach(item => {
+                const itemRef = doc(db, "cart", user.uid, "items", item.id);
+                batch.delete(itemRef);
+            });
+
+            await batch.commit();
+
+            toast({ title: "Checkout Successful!", description: "Your order has been placed." });
+            router.push("/dashboard/my-orders");
+
+        } catch (error) {
+            console.error("Error during checkout:", error);
+            toast({ title: "Checkout Failed", description: "There was an error placing your order. Please try again.", variant: "destructive" });
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
+
 
     const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
@@ -158,7 +250,10 @@ export default function CartPage() {
                                 </div>
                             </CardContent>
                             <CardFooter>
-                                <Button className="w-full">Proceed to Checkout</Button>
+                                <Button className="w-full" onClick={handleCheckout} disabled={checkoutLoading}>
+                                    {checkoutLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Proceed to Checkout
+                                </Button>
                             </CardFooter>
                        </Card>
                     </div>
@@ -167,3 +262,5 @@ export default function CartPage() {
         </div>
     )
 }
+
+    

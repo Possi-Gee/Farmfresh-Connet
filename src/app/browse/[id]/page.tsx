@@ -1,9 +1,10 @@
+
 "use client";
 
-import { doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { notFound, useRouter, useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,14 @@ import { useToast } from "@/hooks/use-toast";
 
 async function getProduceById(id: string): Promise<Produce | null> {
     const docRef = doc(db, "listings", id);
+    
+    // Increment view count
+    if (id) {
+        await updateDoc(docRef, {
+            viewCount: increment(1)
+        }).catch(err => console.log("Failed to increment view count, maybe field doesn't exist yet."));
+    }
+
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -33,6 +42,7 @@ async function getProduceById(id: string): Promise<Produce | null> {
             description: data.description,
             phoneNumber: data.phoneNumber,
             hint: data.productName.toLowerCase(),
+            viewCount: data.viewCount || 1,
         };
     } else {
         return null;
@@ -179,3 +189,5 @@ export default function ProductDetailPage() {
         </div>
     );
 }
+
+    

@@ -1,10 +1,11 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Crop, Lightbulb, Package, LayoutDashboard, ShoppingCart } from "lucide-react";
+import { Crop, Lightbulb, Package, LayoutDashboard, ShoppingCart, ListOrdered, Truck } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -28,6 +29,11 @@ const farmerNavItems = [
     icon: Package,
   },
   {
+    title: "Orders",
+    href: "/dashboard/orders",
+    icon: Truck,
+  },
+  {
     title: "Add Listing",
     href: "/dashboard/listings/new",
     icon: Crop,
@@ -49,6 +55,11 @@ const buyerNavItems = [
         title: "My Cart",
         href: "/cart",
         icon: ShoppingCart,
+    },
+    {
+      title: "My Orders",
+      href: "/dashboard/my-orders",
+      icon: ListOrdered,
     },
     {
         title: "AI Farming Tips",
@@ -120,3 +131,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+    
