@@ -16,6 +16,7 @@ export type Produce = {
     imageUrl: string;
     farmer: string;
     hint: string;
+    description?: string;
 };
 
 async function getProduce(): Promise<Produce[]> {
@@ -35,6 +36,7 @@ async function getProduce(): Promise<Produce[]> {
       location: data.location,
       imageUrl: data.imageUrl,
       farmer: data.farmerName || 'Anonymous Farmer',
+      description: data.description || '',
       hint: data.productName.toLowerCase(), // Use product name for hint
     });
   });
