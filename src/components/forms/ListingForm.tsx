@@ -8,6 +8,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const categories = ["Vegetables", "Fruits", "Grains", "Tubers", "Spices", "Other"];
 
@@ -19,7 +20,20 @@ const formSchema = z.object({
   quantity: z.coerce.number().int().positive("Quantity must be a positive number."),
   unit: z.string().min(1, "Please specify a unit (e.g., kg, crate, bunch)."),
   location: z.string().min(3, "Please enter a location."),
-  // image: z.any().optional(), // File upload would be more complex
+  imageType: z.enum(["url", "upload"]).default("upload"),
+  imageUrl: z.string().url("Please provide a valid URL.").optional().or(z.literal('')),
+  imageFile: z.any().optional(),
+}).refine(data => {
+    if (data.imageType === 'url') {
+        return !!data.imageUrl;
+    }
+    if (data.imageType === 'upload') {
+        return data.imageFile?.length > 0;
+    }
+    return false;
+}, {
+    message: "Please provide an image URL or upload a file.",
+    path: ["imageType"],
 });
 
 export function ListingForm() {
@@ -32,12 +46,16 @@ export function ListingForm() {
       quantity: 1,
       unit: "kg",
       location: "",
+      imageType: "upload",
+      imageUrl: "",
     },
   });
 
+  const imageType = form.watch("imageType");
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    // TODO: Handle form submission (e.g., upload to Firestore)
+    // TODO: Handle form submission (e.g., upload to Firestore/Storage)
   }
 
   return (
@@ -143,14 +161,59 @@ export function ListingForm() {
             </FormItem>
           )}
         />
-        <FormItem>
-          <FormLabel>Product Image</FormLabel>
-          <FormControl>
-            <Input type="file" />
-          </FormControl>
-          <FormDescription>Upload an image of your product.</FormDescription>
-          <FormMessage />
-        </FormItem>
+
+        <FormField
+          control={form.control}
+          name="imageType"
+          render={({ field }) => (
+            <FormItem>
+                <FormLabel>Product Image</FormLabel>
+                <FormControl>
+                    <Tabs
+                        value={field.value}
+                        onValueChange={(value) => field.onChange(value as "url" | "upload")}
+                    >
+                        <TabsList>
+                            <TabsTrigger value="upload">Upload</TabsTrigger>
+                            <TabsTrigger value="url">URL</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="upload" className="mt-4">
+                            <FormField
+                                control={form.control}
+                                name="imageFile"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Input type="file" {...form.register("imageFile")} />
+                                        </FormControl>
+                                        <FormDescription>Upload an image of your product.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </TabsContent>
+                        <TabsContent value="url" className="mt-4">
+                            <FormField
+                                control={form.control}
+                                name="imageUrl"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Input placeholder="https://example.com/image.png" {...field} />
+                                        </FormControl>
+                                        <FormDescription>Enter the URL of the product image.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </TabsContent>
+                    </Tabs>
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <Button type="submit">Create Listing</Button>
       </form>
     </Form>
