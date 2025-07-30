@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface CartItem {
     id: string;
@@ -36,6 +37,9 @@ export default function CartPage() {
                     items.push({ id: doc.id, ...doc.data() } as CartItem);
                 });
                 setCartItems(items);
+                setLoading(false);
+            }, (error) => {
+                console.error("Error fetching cart items:", error);
                 setLoading(false);
             });
             return () => unsubscribe();
@@ -111,10 +115,26 @@ export default function CartPage() {
                                     <p className="text-muted-foreground text-sm">Quantity: {item.quantity}</p>
                                     <p className="font-bold text-primary">GH₵{item.price.toFixed(2)}</p>
                                 </div>
-                                <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Remove item</span>
-                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Remove item</span>
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action will remove "{item.productName}" from your cart.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleRemoveItem(item.id)}>Remove</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                             </Card>
                         ))}
                     </div>
@@ -147,5 +167,3 @@ export default function CartPage() {
         </div>
     )
 }
-
-    

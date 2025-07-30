@@ -9,9 +9,11 @@ import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, DocumentData } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, deleteDoc, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Listing extends DocumentData {
     id: string;
@@ -23,22 +25,35 @@ interface Listing extends DocumentData {
 
 export default function MyListingsPage() {
     const { user } = useAuth();
+    const { toast } = useToast();
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user) {
-            const fetchListings = async () => {
-                setLoading(true);
-                const q = query(collection(db, "listings"), where("farmerId", "==", user.uid));
-                const querySnapshot = await getDocs(q);
+            setLoading(true);
+            const q = query(collection(db, "listings"), where("farmerId", "==", user.uid));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const userListings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Listing));
                 setListings(userListings);
                 setLoading(false);
-            };
-            fetchListings();
+            }, (error) => {
+                console.error("Error fetching listings: ", error);
+                setLoading(false);
+            });
+            return () => unsubscribe();
         }
     }, [user]);
+
+    const handleDeleteListing = async (listingId: string) => {
+        try {
+            await deleteDoc(doc(db, "listings", listingId));
+            toast({ title: "Success", description: "Listing deleted successfully." });
+        } catch (error) {
+            console.error("Error deleting listing: ", error);
+            toast({ title: "Error", description: "Failed to delete listing. Please try again.", variant: "destructive" });
+        }
+    };
 
   return (
     <Card>
@@ -74,19 +89,36 @@ export default function MyListingsPage() {
                     <TableCell>GH₵{listing.price.toFixed(2)}</TableCell>
                     <TableCell>{listing.quantity}</TableCell>
                     <TableCell>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete your
+                                listing for "{listing.productName}".
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteListing(listing.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     </TableCell>
                 </TableRow>
                 ))}
