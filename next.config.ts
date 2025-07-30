@@ -13,51 +13,39 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
+        hostname: '**.placehold.co',
       },
       {
         protocol: 'https',
-        hostname: 'images-prod.healthline.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.healthline.com',
       },
       {
         protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.firebasestorage.googleapis.com',
       },
       {
         protocol: 'https',
-        hostname: 'www.google.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.google.com',
       },
       {
         protocol: 'https',
-        hostname: 'blog.jungseed.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.jungseed.com',
       },
       {
         protocol: 'https',
-        hostname: 'apggreenhouse.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.apggreenhouse.com',
       },
       {
         protocol: 'https',
-        hostname: 'purepng.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.purepng.com',
       },
       {
         protocol: 'https',
-        hostname: 'media.istockphoto.com',
-        port: '',
-        pathname: '/**',
+        hostname: '**.istockphoto.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
       }
     ],
   },
