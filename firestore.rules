@@ -1,33 +1,32 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read access to listings, but restrict writes to the farmer who owns it
+
+    // Allow public read access to listings, but only authenticated users can create/update/delete.
     match /listings/{listingId} {
       allow read: if true;
-      allow create: if request.auth != null && request.resource.data.farmerId == request.auth.uid;
-      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/listings/$(listingId)).data.farmerId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.farmerId;
     }
 
-    // Users can only read and write their own user document
-    match /users/{userId} {
-      allow read, create: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Users can only read and write to their own cart
+    // Allow users to manage their own cart
     match /cart/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Rules for orders
+    // - Buyers can create orders.
+    // - Buyers and the relevant farmer can read an order.
+    // - Only the farmer can update an order (e.g., to change its status).
     match /orders/{orderId} {
-      // Allow buyer to create order
-      allow create: if request.auth != null && request.resource.data.buyerId == request.auth.uid;
-      
-      // Allow buyer to read their own orders, and farmer to read orders for their products
-      allow read: if request.auth != null && (request.resource.data.buyerId == request.auth.uid || request.resource.data.farmerId == request.auth.uid);
-      
-      // Allow farmer to update the status of the order
-      allow update: if request.auth != null && get(/databases/$(database)/documents/orders/$(orderId)).data.farmerId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.farmerId);
+      allow update: if request.auth != null && request.auth.uid == resource.data.farmerId;
+    }
+    
+    // Users can read/write their own user document after signing up.
+    match /users/{userId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
