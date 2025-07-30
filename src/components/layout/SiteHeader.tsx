@@ -25,25 +25,34 @@ export function SiteHeader() {
   const navLinks = [
     { href: "/", label: "Browse", roles: ['buyer', 'farmer', null] }, // null for logged out
   ];
-
-  if (user?.accountType === 'farmer') {
-    navLinks.push({ href: "/dashboard/tips", label: "Farming Tips", roles: ['farmer'] });
-  }
   
   if (user) {
+    if (user.accountType === 'farmer') {
+      navLinks.push({ href: "/dashboard/tips", label: "Farming Tips", roles: ['farmer'] });
+    }
     navLinks.push({ href: "/dashboard", label: "Dashboard", roles: ['buyer', 'farmer'] });
   }
 
 
-  const NavLinks = ({ inSheet }: { inSheet?: boolean }) => (
-    <>
-      {navLinks.map((link) => (
-        <Button key={link.href} variant="ghost" asChild>
-          <Link href={link.href} onClick={() => inSheet && setMenuOpen(false)}>{link.label}</Link>
-        </Button>
-      ))}
-    </>
-  );
+  const NavLinks = ({ inSheet }: { inSheet?: boolean }) => {
+    if (loading) {
+      return (
+        <>
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-8 w-24" />
+        </>
+      )
+    }
+    return (
+      <>
+        {navLinks.map((link) => (
+          <Button key={link.href} variant="ghost" asChild>
+            <Link href={link.href} onClick={() => inSheet && setMenuOpen(false)}>{link.label}</Link>
+          </Button>
+        ))}
+      </>
+    )
+  };
 
   const AuthButtons = () => {
     if (loading) {
@@ -162,5 +171,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
-    
