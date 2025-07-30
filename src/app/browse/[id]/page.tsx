@@ -46,18 +46,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const id = params.id;
 
     useEffect(() => {
-        if (!id) return;
+        if (!params.id) return;
         const fetchProduct = async () => {
             setLoading(true);
-            const productData = await getProduceById(id);
+            const productData = await getProduceById(params.id);
             setProduct(productData);
             setLoading(false);
         }
         fetchProduct();
-    }, [id]);
+    }, [params.id]);
 
     const handleAddToCart = async () => {
         if (!user) {
