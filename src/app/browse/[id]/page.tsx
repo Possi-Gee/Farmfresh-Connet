@@ -4,7 +4,7 @@
 import { doc, getDoc, collection, addDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
