@@ -9,12 +9,13 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, signInWithGoogle } from "@/lib/firebase";
+import { auth, db, signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Separator } from "../ui/separator";
+import { doc, setDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Please enter your full name." }),
@@ -70,6 +71,7 @@ export function SignUpForm() {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
       
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
@@ -77,8 +79,12 @@ export function SignUpForm() {
         });
       }
       
-      // You might want to store the accountType in Firestore or Realtime Database here
-      console.log("Account created for:", userCredential.user);
+      // Store the accountType in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        accountType: values.accountType,
+        fullName: values.fullName,
+        email: values.email,
+      });
       
       router.push("/dashboard");
 
@@ -98,6 +104,9 @@ export function SignUpForm() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
+      // Note: Google Sign-In needs a way to select account type. 
+      // This is a more complex flow, so for now we'll just redirect.
+      // A modal after sign-up would be a good UX improvement.
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Google sign in error:', error);

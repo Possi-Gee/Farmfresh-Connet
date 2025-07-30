@@ -1,9 +1,34 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardOverviewPage() {
+  const { user } = useAuth();
+
+  if (user?.accountType === 'buyer') {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold font-headline mb-6">Welcome, {user.displayName || 'Buyer'}!</h1>
+        <Card>
+          <CardHeader>
+            <CardTitle>Start Exploring</CardTitle>
+            <CardDescription>Find the freshest produce from local farmers.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/">Browse Produce Listings</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Farmer's Dashboard
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

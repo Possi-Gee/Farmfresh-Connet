@@ -4,15 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Crop, Lightbulb, Package, LayoutDashboard } from "lucide-react";
+import { Crop, Lightbulb, Package, LayoutDashboard, ShoppingCart } from "lucide-react";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Menu } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
-const sidebarNavItems = [
+const farmerNavItems = [
   {
     title: "Overview",
     href: "/dashboard",
@@ -35,12 +36,28 @@ const sidebarNavItems = [
   },
 ];
 
+const buyerNavItems = [
+    {
+      title: "Browse Produce",
+      href: "/",
+      icon: ShoppingCart,
+    },
+    {
+        title: "AI Farming Tips",
+        href: "/dashboard/tips",
+        icon: Lightbulb,
+    },
+];
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const sidebarNavItems = user?.accountType === 'farmer' ? farmerNavItems : buyerNavItems;
 
   const Nav = () => (
     <nav className="grid items-start gap-2">
