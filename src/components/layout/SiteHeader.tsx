@@ -30,11 +30,11 @@ export function SiteHeader() {
     navLinks.push({ href: "/dashboard", label: "Dashboard" });
   }
 
-  const NavLinks = () => (
+  const NavLinks = ({ inSheet }: { inSheet?: boolean }) => (
     <>
       {navLinks.map((link) => (
         <Button key={link.href} variant="ghost" asChild>
-          <Link href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</Link>
+          <Link href={link.href} onClick={() => inSheet && setMenuOpen(false)}>{link.label}</Link>
         </Button>
       ))}
     </>
@@ -81,14 +81,14 @@ export function SiteHeader() {
     }
   
     return (
-      <>
+      <div className="flex flex-col space-y-2">
         <Button variant="outline" asChild>
           <Link href="/sign-in" onClick={() => setMenuOpen(false)}>Sign In</Link>
         </Button>
         <Button asChild>
           <Link href="/sign-up" onClick={() => setMenuOpen(false)}>Sign Up</Link>
         </Button>
-      </>
+      </div>
     );
   };
 
@@ -121,16 +121,19 @@ export function SiteHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+              <SheetHeader className="mb-4">
+                <SheetTitle className="flex items-center">
+                  <Link href="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
+                    <Leaf className="mr-2 h-6 w-6 text-primary" />
+                    <span className="font-bold">FarmFresh Connect</span>
+                  </Link>
+                </SheetTitle>
               </SheetHeader>
-              <Link href="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
-                <Leaf className="mr-2 h-6 w-6 text-primary" />
-                <span className="font-bold">FarmFresh Connect</span>
-              </Link>
-              <div className="mt-6 flex flex-col space-y-4">
-                <NavLinks />
-                <div className="border-t pt-4 flex flex-col space-y-2">
+              <div className="flex h-full flex-col">
+                <div className="flex flex-col space-y-2">
+                  <NavLinks inSheet />
+                </div>
+                <div className="mt-auto border-t pt-4">
                   <MobileAuthButtons />
                 </div>
               </div>
