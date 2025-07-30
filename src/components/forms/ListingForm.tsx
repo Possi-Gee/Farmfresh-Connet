@@ -113,7 +113,7 @@ export function ListingForm() {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel>Price (GH₵)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="3.99" {...field} />
                 </FormControl>

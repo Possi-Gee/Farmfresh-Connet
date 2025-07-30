@@ -37,7 +37,7 @@ export default function MyListingsPage() {
                 <TableCell>
                   <Badge variant={listing.status === 'Active' ? 'default' : 'outline'}>{listing.status}</Badge>
                 </TableCell>
-                <TableCell>${listing.price.toFixed(2)}</TableCell>
+                <TableCell>GH₵{listing.price.toFixed(2)}</TableCell>
                 <TableCell>{listing.quantity}</TableCell>
                 <TableCell>
                   <DropdownMenu>

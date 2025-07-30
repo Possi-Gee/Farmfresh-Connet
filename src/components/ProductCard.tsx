@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
           <p className="text-lg font-bold text-primary">
-            ${product.price.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ {product.unit}</span>
+            GH₵{product.price.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ {product.unit}</span>
           </p>
           <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ShoppingCart className="mr-2 h-4 w-4"/>
