@@ -1,83 +1,26 @@
 import { ProductCard } from "@/components/ProductCard";
 import { FilterSidebar } from "@/components/FilterSidebar";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-// Mock data for produce listings
-const produce = [
-  {
-    id: "1",
-    name: "Organic Tomatoes",
-    category: "Vegetables",
-    price: 3.99,
-    unit: "kg",
-    quantity: 50,
-    location: "Kumasi, Ashanti",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Afia Bio Farms",
-    hint: "tomatoes vegetable",
-  },
-  {
-    id: "2",
-    name: "Fresh Mangoes",
-    category: "Fruits",
-    price: 5.00,
-    unit: "crate",
-    quantity: 100,
-    location: "Sunyani, Bono",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Bono Tropical Fruits",
-    hint: "mangoes fruit",
-  },
-  {
-    id: "3",
-    name: "Sweet Corn",
-    category: "Grains",
-    price: 2.50,
-    unit: "cob",
-    quantity: 200,
-    location: "Techiman, Bono East",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Golden Corn Fields",
-    hint: "corn grain",
-  },
-  {
-    id: "4",
-    name: "Yams",
-    category: "Tubers",
-    price: 10.00,
-    unit: "tuber",
-    quantity: 150,
-    location: "Tamale, Northern",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Northern Star Tubers",
-    hint: "yams tubers",
-  },
-  {
-    id: "5",
-    name: "Habanero Peppers",
-    category: "Vegetables",
-    price: 8.50,
-    unit: "kg",
-    quantity: 30,
-    location: "Cape Coast, Central",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Coastal Spice Co.",
-    hint: "pepper spicy",
-  },
-  {
-    id: "6",
-    name: "Juicy Pineapples",
-    category: "Fruits",
-    price: 4.00,
-    unit: "each",
-    quantity: 80,
-    location: "Ho, Volta",
-    imageUrl: "https://placehold.co/600x400.png",
-    farmer: "Volta Sweet Pineapples",
-    hint: "pineapple fruit",
-  },
-];
+// Mock data for produce listings - now empty
+const produce = [];
 
-export type Produce = (typeof produce)[0];
+// This type definition is kept to avoid breaking other components that might rely on it.
+// In a real application, this would likely come from a shared types file.
+export type Produce = {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    unit: string;
+    quantity: number;
+    location: string;
+    imageUrl: string;
+    farmer: string;
+    hint: string;
+};
+
 
 export default function Home() {
   return (
@@ -88,11 +31,25 @@ export default function Home() {
         </div>
         <div className="col-span-1 md:col-span-3">
           <h1 className="text-3xl font-headline font-bold mb-6">Fresh Produce</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {produce.map((item) => (
-              <ProductCard key={item.id} product={item} />
-            ))}
-          </div>
+          {produce.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {produce.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center py-20 rounded-lg border-2 border-dashed">
+                <h2 className="text-2xl font-bold mb-2">No Produce Available Yet</h2>
+                <p className="text-muted-foreground mb-4">Check back soon for fresh listings from our farmers!</p>
+                <p className="text-sm text-muted-foreground">Are you a farmer? 
+                    <Button variant="link" asChild className="p-1">
+                        <Link href="/dashboard/listings/new">
+                            Add a listing
+                        </Link>
+                    </Button>
+                </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
