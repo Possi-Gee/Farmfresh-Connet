@@ -76,11 +76,9 @@ export function SignUpForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, {
+      await updateProfile(user, {
           displayName: values.fullName,
-        });
-      }
+      });
       
       await setDoc(doc(db, "users", user.uid), {
         accountType: values.accountType,

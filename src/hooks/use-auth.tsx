@@ -59,12 +59,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
     const isDashboardPage = pathname.startsWith('/dashboard');
+    const isProfileCompletePage = pathname === '/dashboard/complete-profile';
 
-    if (!user && isDashboardPage) {
+    if (!user && isDashboardPage && !isProfileCompletePage) {
       router.push('/sign-in');
     } else if (user && isAuthPage) {
       router.push('/dashboard');
+    } else if (user && !user.accountType && !isProfileCompletePage) {
+      router.push('/dashboard/complete-profile');
+    } else if (user && user.accountType && isProfileCompletePage) {
+      router.push('/dashboard');
     }
+
   }, [user, loading, pathname, router]);
 
 
