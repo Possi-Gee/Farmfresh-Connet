@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
         hostname: 'apggreenhouse.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'purepng.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
