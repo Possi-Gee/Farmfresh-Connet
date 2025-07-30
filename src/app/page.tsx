@@ -41,7 +41,7 @@ async function getProduce(): Promise<Produce[]> {
       farmer: data.farmerName || 'Anonymous Farmer',
       description: data.description || '',
       phoneNumber: data.phoneNumber || '',
-      hint: data.productName.toLowerCase(), // Use product name for hint
+      hint: (data.productName || '').toLowerCase(), // Use product name for hint
       viewCount: data.viewCount || 0,
     });
   });

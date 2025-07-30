@@ -34,9 +34,13 @@ export function ProductCard({ product }: ProductCardProps) {
           </CardDescription>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <p className="text-lg font-bold text-primary">
-            GH₵{product.price.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ {product.unit}</span>
-          </p>
+          {typeof product.price === 'number' ? (
+            <p className="text-lg font-bold text-primary">
+              GH₵{product.price.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ {product.unit}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Price not available</p>
+          )}
           <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ShoppingCart className="mr-2 h-4 w-4"/>
             View
