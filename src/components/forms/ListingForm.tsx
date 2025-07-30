@@ -29,6 +29,7 @@ const formSchema = z.object({
   quantity: z.coerce.number().int().positive("Quantity must be a positive number."),
   unit: z.string().min(1, "Please specify a unit (e.g., kg, crate, bunch)."),
   location: z.string().min(3, "Please enter a location."),
+  phoneNumber: z.string().min(10, "Please enter a valid phone number."),
   imageType: z.enum(["upload", "url"]).default("upload"),
   imageUrl: z.string().url("Please provide a valid URL.").optional().or(z.literal('')),
   imageFile: z.any().optional(),
@@ -60,6 +61,7 @@ export function ListingForm() {
       quantity: 1,
       unit: "kg",
       location: "",
+      phoneNumber: "",
       imageType: "upload",
       imageUrl: "",
     },
@@ -95,6 +97,7 @@ export function ListingForm() {
             quantity: values.quantity,
             unit: values.unit,
             location: values.location,
+            phoneNumber: values.phoneNumber,
             imageUrl: imageUrl,
             createdAt: serverTimestamp(),
             status: "Active",
@@ -201,19 +204,34 @@ export function ListingForm() {
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. Kumasi, Ashanti" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                    <Input placeholder="e.g. Kumasi, Ashanti" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                    <Input placeholder="e.g. 024xxxxxxx" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+        </div>
 
         <FormField
           control={form.control}
@@ -275,3 +293,5 @@ export function ListingForm() {
     </Form>
   );
 }
+
+    

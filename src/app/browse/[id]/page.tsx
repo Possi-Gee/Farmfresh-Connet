@@ -1,12 +1,18 @@
-import { doc, getDoc } from "firebase/firestore";
+"use client";
+
+import { doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, User, MapPin, Package } from "lucide-react";
+import { ShoppingCart, User, MapPin, Package, Phone } from "lucide-react";
 import type { Produce } from "@/app/page";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 async function getProduceById(id: string): Promise<Produce | null> {
     const docRef = doc(db, "listings", id);
@@ -25,6 +31,7 @@ async function getProduceById(id: string): Promise<Produce | null> {
             imageUrl: data.imageUrl,
             farmer: data.farmerName || 'Anonymous Farmer',
             description: data.description,
+            phoneNumber: data.phoneNumber,
             hint: data.productName.toLowerCase(),
         };
     } else {
@@ -33,8 +40,75 @@ async function getProduceById(id: string): Promise<Produce | null> {
 }
 
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-    const product = await getProduceById(params.id);
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+    const [product, setProduct] = useState<Produce | null>(null);
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+    const router = useRouter();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            setLoading(true);
+            const productData = await getProduceById(params.id);
+            setProduct(productData);
+            setLoading(false);
+        }
+        fetchProduct();
+    }, [params.id]);
+
+    const handleAddToCart = async () => {
+        if (!user) {
+            toast({ title: "Please sign in", description: "You need to be logged in to add items to your cart.", variant: "destructive" });
+            router.push('/sign-in');
+            return;
+        }
+
+        if (product) {
+            try {
+                await addDoc(collection(db, "cart", user.uid, "items"), {
+                    productId: product.id,
+                    productName: product.name,
+                    price: product.price,
+                    unit: product.unit,
+                    imageUrl: product.imageUrl,
+                    quantity: 1, // Default quantity
+                    addedAt: serverTimestamp(),
+                });
+                toast({ title: "Success!", description: `${product.name} has been added to your cart.` });
+            } catch (error) {
+                console.error("Error adding to cart: ", error);
+                toast({ title: "Error", description: "Could not add item to cart. Please try again.", variant: "destructive" });
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="container mx-auto py-12">
+                <div className="grid md:grid-cols-2 gap-12">
+                    <Card className="overflow-hidden">
+                        <Skeleton className="h-96 w-full" />
+                    </Card>
+                    <div className="flex flex-col gap-6">
+                        <Skeleton className="h-8 w-1/4" />
+                        <Skeleton className="h-12 w-3/4" />
+                        <div className="flex items-center gap-4 mt-2">
+                            <Skeleton className="h-6 w-1/2" />
+                            <Skeleton className="h-6 w-1/2" />
+                        </div>
+                        <Skeleton className="h-24 w-full" />
+                        <Card>
+                            <CardContent className="p-6 flex flex-col gap-4">
+                                <Skeleton className="h-12 w-full" />
+                                <Skeleton className="h-12 w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     if (!product) {
         notFound();
@@ -59,7 +133,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                     <div>
                         <Badge variant="secondary" className="mb-2">{product.category}</Badge>
                         <h1 className="text-4xl font-bold font-headline">{product.name}</h1>
-                        <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-muted-foreground">
                             <div className="flex items-center gap-1">
                                 <User className="h-4 w-4" />
                                 <span>{product.farmer}</span>
@@ -68,6 +142,12 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                                 <MapPin className="h-4 w-4" />
                                 <span>{product.location}</span>
                             </div>
+                            {product.phoneNumber && (
+                                <div className="flex items-center gap-1">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{product.phoneNumber}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     
@@ -85,7 +165,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                                     <span>{product.quantity} available</span>
                                 </div>
                             </div>
-                            <Button size="lg" className="w-full">
+                            <Button size="lg" className="w-full" onClick={handleAddToCart}>
                                 <ShoppingCart className="mr-2" />
                                 Add to Cart
                             </Button>
@@ -96,3 +176,5 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         </div>
     );
 }
+
+    

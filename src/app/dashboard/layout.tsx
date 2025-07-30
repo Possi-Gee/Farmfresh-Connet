@@ -46,6 +46,11 @@ const buyerNavItems = [
       icon: ShoppingCart,
     },
     {
+        title: "My Cart",
+        href: "/cart",
+        icon: ShoppingCart,
+    },
+    {
         title: "AI Farming Tips",
         href: "/dashboard/tips",
         icon: Lightbulb,
@@ -115,3 +120,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+    

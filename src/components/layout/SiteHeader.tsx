@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Leaf, Menu, LogOut } from "lucide-react";
+import { Leaf, Menu, LogOut, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -47,10 +47,18 @@ export function SiteHeader() {
 
     if (user) {
       return (
-        <Button variant="ghost" onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
-        </Button>
+          <>
+            <Button variant="ghost" asChild size="icon">
+                <Link href="/cart">
+                    <ShoppingCart className="h-5 w-5" />
+                    <span className="sr-only">Cart</span>
+                </Link>
+            </Button>
+            <Button variant="ghost" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </>
       );
     }
 
@@ -109,7 +117,7 @@ export function SiteHeader() {
         </div>
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <div className="hidden md:flex">
+          <div className="hidden md:flex items-center">
             <AuthButtons />
           </div>
 
@@ -132,6 +140,11 @@ export function SiteHeader() {
               <div className="flex h-full flex-col">
                 <div className="flex flex-col space-y-2">
                   <NavLinks inSheet />
+                   {user && (
+                    <Button variant="ghost" asChild>
+                        <Link href="/cart" onClick={() => setMenuOpen(false)}>My Cart</Link>
+                    </Button>
+                   )}
                 </div>
                 <div className="mt-auto border-t pt-4">
                   <MobileAuthButtons />
@@ -144,3 +157,5 @@ export function SiteHeader() {
     </header>
   );
 }
+
+    

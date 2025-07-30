@@ -17,6 +17,7 @@ export type Produce = {
     farmer: string;
     hint: string;
     description?: string;
+    phoneNumber?: string;
 };
 
 async function getProduce(): Promise<Produce[]> {
@@ -37,6 +38,7 @@ async function getProduce(): Promise<Produce[]> {
       imageUrl: data.imageUrl,
       farmer: data.farmerName || 'Anonymous Farmer',
       description: data.description || '',
+      phoneNumber: data.phoneNumber || '',
       hint: data.productName.toLowerCase(), // Use product name for hint
     });
   });
@@ -79,3 +81,5 @@ export default async function Home() {
     </div>
   );
 }
+
+    
