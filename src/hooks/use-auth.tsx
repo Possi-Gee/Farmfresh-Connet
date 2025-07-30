@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -9,6 +10,7 @@ import { doc, getDoc } from 'firebase/firestore';
 interface AuthUser extends User {
   accountType?: 'farmer' | 'buyer';
   displayName: string | null;
+  phoneNumber?: string;
 }
 
 interface AuthContextType {
@@ -37,7 +39,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
 
         if (userDoc.exists()) {
-          userData.accountType = userDoc.data()?.accountType;
+          const data = userDoc.data();
+          userData.accountType = data?.accountType;
+          userData.phoneNumber = data?.phoneNumber;
         }
         setUser(userData);
 

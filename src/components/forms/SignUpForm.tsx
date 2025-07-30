@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -21,6 +22,7 @@ const formSchema = z.object({
   fullName: z.string().min(2, { message: "Please enter your full name." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  phoneNumber: z.string().min(10, "Please enter a valid phone number."),
   accountType: z.enum(["farmer", "buyer"], { required_error: "Please select an account type." }),
 });
 
@@ -64,6 +66,7 @@ export function SignUpForm() {
       fullName: "",
       email: "",
       password: "",
+      phoneNumber: "",
     },
   });
 
@@ -79,11 +82,11 @@ export function SignUpForm() {
         });
       }
       
-      // Store the accountType in Firestore
       await setDoc(doc(db, "users", user.uid), {
         accountType: values.accountType,
         fullName: values.fullName,
         email: values.email,
+        phoneNumber: values.phoneNumber,
       });
       
       router.push("/dashboard");
@@ -104,9 +107,6 @@ export function SignUpForm() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      // Note: Google Sign-In needs a way to select account type. 
-      // This is a more complex flow, so for now we'll just redirect.
-      // A modal after sign-up would be a good UX improvement.
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Google sign in error:', error);
@@ -157,6 +157,19 @@ export function SignUpForm() {
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="024xxxxxxx" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

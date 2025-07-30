@@ -25,6 +25,7 @@ interface OrderItem {
 interface Order extends DocumentData {
     id: string;
     buyerName: string;
+    buyerPhoneNumber: string;
     items: OrderItem[];
     status: "Pending" | "Shipped" | "Delivered";
     total: number;
@@ -105,6 +106,7 @@ export default function FarmerOrdersPage() {
                                 <TableHead>Order ID</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Buyer</TableHead>
+                                <TableHead>Contact</TableHead>
                                 <TableHead>Items</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead>Status</TableHead>
@@ -117,6 +119,7 @@ export default function FarmerOrdersPage() {
                                     <TableCell className="font-medium">#{order.id.slice(0, 6)}</TableCell>
                                     <TableCell>{format(order.createdAt.toDate(), "PP")}</TableCell>
                                     <TableCell>{order.buyerName}</TableCell>
+                                    <TableCell>{order.buyerPhoneNumber}</TableCell>
                                     <TableCell>{order.items.map(item => item.productName).join(', ')}</TableCell>
                                     <TableCell>GH₵{order.total.toFixed(2)}</TableCell>
                                     <TableCell>
@@ -154,6 +157,3 @@ export default function FarmerOrdersPage() {
         </Card>
     );
 }
-
-
-    

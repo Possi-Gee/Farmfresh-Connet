@@ -25,7 +25,7 @@ interface CartItem {
     unit: string;
     imageUrl: string;
     quantity: number;
-    farmerId: string; // Add farmerId to cart item
+    farmerId: string;
 }
 
 async function getProduceById(id: string): Promise<(Produce & { farmerId: string }) | null> {
@@ -46,7 +46,7 @@ async function getProduceById(id: string): Promise<(Produce & { farmerId: string
             farmer: data.farmerName || 'Anonymous Farmer',
             description: data.description,
             phoneNumber: data.phoneNumber,
-            hint: data.productName.toLowerCase(),
+            hint: (data.productName || '').toLowerCase(),
             farmerId: data.farmerId,
         };
     } else {
@@ -123,8 +123,9 @@ export default function CartPage() {
                 const orderData = {
                     buyerId: user.uid,
                     buyerName: user.displayName || 'Anonymous Buyer',
+                    buyerPhoneNumber: user.phoneNumber || 'Not available',
                     farmerId: farmerId,
-                    items: farmerItems.map(({ id, ...rest }) => rest), // remove cart item id
+                    items: farmerItems.map(({ id, ...rest }) => rest), 
                     total,
                     status: "Pending",
                     createdAt: serverTimestamp(),
@@ -133,7 +134,6 @@ export default function CartPage() {
                 batch.set(orderRef, orderData);
             }
             
-            // Clear the cart
             cartItems.forEach(item => {
                 const itemRef = doc(db, "cart", user.uid, "items", item.id);
                 batch.delete(itemRef);
