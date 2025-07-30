@@ -3,7 +3,7 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, doc, deleteDoc, addDoc, writeBatch, serverTimestamp, getDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, deleteDoc, writeBatch, serverTimestamp, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import type { Produce } from "@/app/page";
+import { Separator } from "@/components/ui/separator";
 
 interface CartItem {
     id: string;
@@ -250,10 +251,49 @@ export default function CartPage() {
                                 </div>
                             </CardContent>
                             <CardFooter>
-                                <Button className="w-full" onClick={handleCheckout} disabled={checkoutLoading}>
-                                    {checkoutLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Proceed to Checkout
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button className="w-full" disabled={checkoutLoading}>
+                                            Proceed to Checkout
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Review Your Order</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                You are about to place an order for the following items. Please confirm the details before proceeding.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        
+                                        <div className="space-y-2 my-4">
+                                            {cartItems.map(item => (
+                                                <div key={item.id} className="flex justify-between items-center text-sm">
+                                                    <span>{item.productName} (x{item.quantity})</span>
+                                                    <span className="font-medium">GH₵{(item.price * item.quantity).toFixed(2)}</span>
+                                                </div>
+                                            ))}
+                                            <Separator />
+                                            <div className="flex justify-between font-bold">
+                                                <span>Total</span>
+                                                <span>GH₵{cartTotal.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleCheckout} disabled={checkoutLoading}>
+                                                {checkoutLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Placing Order...
+                                                    </>
+                                                ) : (
+                                                    "Confirm Order"
+                                                )}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </CardFooter>
                        </Card>
                     </div>
