@@ -3,7 +3,7 @@
 import { doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,9 @@ async function getProduceById(id: string): Promise<Produce | null> {
 }
 
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage() {
+    const params = useParams();
+    const id = params.id as string;
     const [product, setProduct] = useState<Produce | null>(null);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
@@ -49,15 +51,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
     useEffect(() => {
         const fetchProduct = async () => {
+            if (!id) return;
             setLoading(true);
-            const productData = await getProduceById(params.id);
+            const productData = await getProduceById(id);
             setProduct(productData);
             setLoading(false);
         }
-        if (params.id) {
-            fetchProduct();
-        }
-    }, [params.id]);
+        fetchProduct();
+    }, [id]);
 
     const handleAddToCart = async () => {
         if (!user) {
