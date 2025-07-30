@@ -61,11 +61,6 @@ const buyerNavItems = [
       href: "/dashboard/my-orders",
       icon: ListOrdered,
     },
-    {
-        title: "AI Farming Tips",
-        href: "/dashboard/tips",
-        icon: Lightbulb,
-    },
 ];
 
 export default function DashboardLayout({
@@ -131,5 +126,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-    
