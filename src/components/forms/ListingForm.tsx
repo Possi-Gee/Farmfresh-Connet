@@ -22,6 +22,11 @@ import type { Listing } from "@/app/dashboard/listings/page";
 
 
 const categories = ["Vegetables", "Fruits", "Grains", "Tubers", "Spices", "Other"];
+const regions = [
+    "Ashanti", "Bono", "Bono East", "Ahafo", "Central", "Eastern",
+    "Greater Accra", "Northern", "Savannah", "North East", "Upper East",
+    "Upper West", "Volta", "Oti", "Western", "Western North"
+];
 
 const formSchema = z.object({
   productName: z.string().min(3, "Product name must be at least 3 characters."),
@@ -30,7 +35,7 @@ const formSchema = z.object({
   price: z.coerce.number().positive("Price must be a positive number."),
   quantity: z.coerce.number().int().positive("Quantity must be a positive number."),
   unit: z.string().min(1, "Please specify a unit (e.g., kg, crate, bunch)."),
-  location: z.string().min(3, "Please enter a location."),
+  location: z.string({ required_error: "Please select a region." }),
   phoneNumber: z.string().min(10, "Please enter a valid phone number."),
   imageType: z.enum(["upload", "url"]).default("upload"),
   imageUrl: z.string().url("Please provide a valid URL.").optional().or(z.literal('')),
@@ -246,17 +251,24 @@ export function ListingForm({ listing }: ListingFormProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. Kumasi, Ashanti" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a region" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {regions.map(reg => <SelectItem key={reg} value={reg}>{reg}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
             />
             <FormField
             control={form.control}
