@@ -40,6 +40,12 @@ const nextConfig: NextConfig = {
         hostname: 'blog.jungseed.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'apggreenhouse.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
