@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
+    // This function runs once on mount
     const processAuth = async () => {
       try {
-        // This will be null if no redirect has happened.
         await getRedirectResult(auth);
       } catch (error) {
         console.error("Error processing redirect result:", error);
