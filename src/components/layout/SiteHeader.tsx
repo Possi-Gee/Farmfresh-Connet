@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Leaf, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
 export function SiteHeader() {
@@ -59,6 +59,9 @@ export function SiteHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+              </SheetHeader>
               <Link href="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
                 <Leaf className="mr-2 h-6 w-6 text-primary" />
                 <span className="font-bold">FarmFresh Connect</span>
