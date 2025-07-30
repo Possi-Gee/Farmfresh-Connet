@@ -105,7 +105,6 @@ export function SignUpForm() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast({
