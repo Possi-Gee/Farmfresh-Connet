@@ -48,14 +48,15 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     const { toast } = useToast();
 
     useEffect(() => {
-        if (!params.id) return;
         const fetchProduct = async () => {
             setLoading(true);
             const productData = await getProduceById(params.id);
             setProduct(productData);
             setLoading(false);
         }
-        fetchProduct();
+        if (params.id) {
+            fetchProduct();
+        }
     }, [params.id]);
 
     const handleAddToCart = async () => {
