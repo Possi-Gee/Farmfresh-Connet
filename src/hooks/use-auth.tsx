@@ -27,46 +27,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        const userData: AuthUser = {
-          ...firebaseUser,
-          displayName: firebaseUser.displayName,
-          accountType: undefined,
-        };
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          userData.accountType = data?.accountType;
-          userData.phoneNumber = data?.phoneNumber;
-        }
-        setUser(userData);
-
-      } else {
-        setUser(null);
+    const processAuth = async () => {
+      try {
+        // This will be null if no redirect has happened.
+        await getRedirectResult(auth);
+      } catch (error) {
+        console.error("Error processing redirect result:", error);
       }
-      setLoading(false);
-    });
+      
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          const userData: AuthUser = {
+            ...firebaseUser,
+            displayName: firebaseUser.displayName,
+            accountType: undefined,
+          };
+  
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            userData.accountType = data?.accountType;
+            userData.phoneNumber = data?.phoneNumber;
+          }
+          setUser(userData);
+  
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      });
+      return unsubscribe;
+    }
 
-    return () => unsubscribe();
+    const unsubscribePromise = processAuth();
+
+    return () => {
+      unsubscribePromise.then(unsubscribe => unsubscribe && unsubscribe());
+    };
   }, []);
 
   useEffect(() => {
     if (loading) return;
-
-    // This prevents the hook from redirecting while on the auth pages,
-    // which could interfere with the Firebase redirect result handling.
-    const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
-    if (isAuthPage) {
-        getRedirectResult(auth).catch(error => {
-            console.error("Error getting redirect result:", error);
-        });
-        return;
-    };
     
+    const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
     const isDashboardPage = pathname.startsWith('/dashboard');
     const isProfileCompletePage = pathname === '/dashboard/complete-profile';
 
