@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MoreHorizontal } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil } from "lucide-react";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,12 +16,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-interface Listing extends DocumentData {
+export interface Listing extends DocumentData {
     id: string;
     productName: string;
-    status: string;
+    description: string;
+    category: string;
     price: number;
     quantity: number;
+    unit: string;
+    location: string;
+    phoneNumber: string;
+    imageUrl: string;
+    status: string;
     viewCount: number;
 }
 
@@ -108,7 +114,11 @@ export default function MyListingsPage() {
                                 <Eye className="mr-2 h-4 w-4" /> View
                                </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                               <Link href={`/dashboard/listings/edit/${listing.id}`}>
+                                <Pencil className="mr-2 h-4 w-4" /> Edit
+                               </Link>
+                            </DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Delete</DropdownMenuItem>
                             </AlertDialogTrigger>
@@ -146,5 +156,3 @@ export default function MyListingsPage() {
     </Card>
   );
 }
-
-    

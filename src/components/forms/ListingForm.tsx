@@ -11,13 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import type { Listing } from "@/app/dashboard/listings/page";
 
 
 const categories = ["Vegetables", "Fruits", "Grains", "Tubers", "Spices", "Other"];
@@ -38,37 +39,60 @@ const formSchema = z.object({
     if (data.imageType === 'url') {
         return !!data.imageUrl;
     }
-    if (data.imageType === 'upload') {
+    // For editing, an image might already exist, so no new file is required.
+    // For creating, a file is required for upload type.
+    if (data.imageType === 'upload' && !data.imageUrl) {
         return data.imageFile?.length > 0;
     }
-    return false;
+    return true;
 }, {
     message: "Please provide an image URL or upload a file.",
     path: ["imageType"],
 });
 
-export function ListingForm() {
+interface ListingFormProps {
+    listing?: Listing;
+}
+
+export function ListingForm({ listing }: ListingFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const isEditMode = !!listing;
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      productName: "",
-      description: "",
-      price: 0,
-      quantity: 1,
-      unit: "kg",
-      location: "",
-      phoneNumber: "",
-      imageType: "upload",
-      imageUrl: "",
+      productName: listing?.productName || "",
+      description: listing?.description || "",
+      category: listing?.category || "",
+      price: listing?.price || 0,
+      quantity: listing?.quantity || 1,
+      unit: listing?.unit || "kg",
+      location: listing?.location || "",
+      phoneNumber: listing?.phoneNumber || "",
+      imageType: listing?.imageUrl ? "url" : "upload",
+      imageUrl: listing?.imageUrl || "",
     },
   });
 
-  const imageType = form.watch("imageType");
+  useEffect(() => {
+    if (listing) {
+      form.reset({
+        productName: listing.productName,
+        description: listing.description,
+        category: listing.category,
+        price: listing.price,
+        quantity: listing.quantity,
+        unit: listing.unit,
+        location: listing.location,
+        phoneNumber: listing.phoneNumber,
+        imageType: listing.imageUrl ? "url" : "upload",
+        imageUrl: listing.imageUrl,
+      });
+    }
+  }, [listing, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -78,7 +102,7 @@ export function ListingForm() {
     setLoading(true);
 
     try {
-        let imageUrl = values.imageUrl || '';
+        let imageUrl = values.imageUrl || listing?.imageUrl || '';
         
         if (values.imageType === 'upload' && values.imageFile?.length > 0) {
             const file = values.imageFile[0];
@@ -88,29 +112,43 @@ export function ListingForm() {
             imageUrl = await getDownloadURL(snapshot.ref);
         }
 
-        await addDoc(collection(db, "listings"), {
-            farmerId: user.uid,
-            farmerName: user.displayName,
-            productName: values.productName,
-            description: values.description,
-            category: values.category,
-            price: values.price,
-            quantity: values.quantity,
-            unit: values.unit,
-            location: values.location,
-            phoneNumber: values.phoneNumber,
-            imageUrl: imageUrl,
-            createdAt: serverTimestamp(),
-            status: "Active",
-            viewCount: 0,
-        });
+        const listingData = {
+          farmerId: user.uid,
+          farmerName: user.displayName,
+          productName: values.productName,
+          description: values.description,
+          category: values.category,
+          price: values.price,
+          quantity: values.quantity,
+          unit: values.unit,
+          location: values.location,
+          phoneNumber: values.phoneNumber,
+          imageUrl: imageUrl,
+          status: "Active",
+          viewCount: listing?.viewCount || 0,
+        };
+        
+        if (isEditMode) {
+            const listingRef = doc(db, "listings", listing.id);
+            await updateDoc(listingRef, {
+              ...listingData,
+              updatedAt: serverTimestamp(),
+            });
+            toast({ title: "Success!", description: "Your listing has been updated." });
+        } else {
+            await addDoc(collection(db, "listings"), {
+                ...listingData,
+                createdAt: serverTimestamp(),
+            });
+            toast({ title: "Success!", description: "Your listing has been created." });
+        }
 
-        toast({ title: "Success!", description: "Your listing has been created." });
         router.push("/dashboard/listings");
+        router.refresh(); // To show the updated data
 
     } catch (error) {
-        console.error("Error creating listing:", error);
-        toast({ title: "Error", description: "Failed to create listing. Please try again.", variant: "destructive" });
+        console.error("Error saving listing:", error);
+        toast({ title: "Error", description: "Failed to save listing. Please try again.", variant: "destructive" });
     } finally {
         setLoading(false);
     }
@@ -243,7 +281,7 @@ export function ListingForm() {
                 <FormLabel>Product Image</FormLabel>
                 <FormControl>
                     <Tabs
-                        value={field.value}
+                        value={form.watch("imageType")}
                         onValueChange={(value) => field.onChange(value as "url" | "upload")}
                     >
                         <TabsList>
@@ -254,12 +292,12 @@ export function ListingForm() {
                             <FormField
                                 control={form.control}
                                 name="imageFile"
-                                render={({ field }) => (
+                                render={() => (
                                     <FormItem>
                                         <FormControl>
                                             <Input type="file" {...form.register("imageFile")} />
                                         </FormControl>
-                                        <FormDescription>Upload an image of your product.</FormDescription>
+                                        <FormDescription>Upload a new image to replace the old one, or leave blank to keep the current image.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -289,13 +327,9 @@ export function ListingForm() {
         
         <Button type="submit" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Listing
+            {isEditMode ? "Save Changes" : "Create Listing"}
         </Button>
       </form>
     </Form>
   );
 }
-
-    
-
-    
