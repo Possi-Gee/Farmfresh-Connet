@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -67,9 +68,13 @@ export function SignInForm() {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Sign in error:", error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/invalid-credential') {
+        description = "Incorrect email or password. Please try again.";
+      }
       toast({
         title: "Sign-in Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: description,
         variant: "destructive",
       });
     } finally {
