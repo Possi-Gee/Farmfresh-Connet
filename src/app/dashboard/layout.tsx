@@ -8,6 +8,9 @@ import { Crop, Lightbulb, Package, LayoutDashboard, ShoppingCart } from "lucide-
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Menu } from "lucide-react";
@@ -95,10 +98,15 @@ export default function DashboardLayout({
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[240px]">
-                    <div className="p-4">
-                    <h2 className="text-lg font-semibold mb-4">Dashboard</h2>
+                  <SheetHeader>
+                    <SheetTitle>Dashboard</SheetTitle>
+                    <SheetDescription>
+                      Navigate through your dashboard options.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="p-4">
                     <Nav/>
-                    </div>
+                  </div>
                 </SheetContent>
             </Sheet>
         </div>
