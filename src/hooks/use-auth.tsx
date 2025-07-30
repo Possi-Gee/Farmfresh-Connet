@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
@@ -27,45 +27,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // This function runs once on mount
-    const processAuth = async () => {
-      try {
-        await getRedirectResult(auth);
-      } catch (error) {
-        console.error("Error processing redirect result:", error);
-      }
-      
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        if (firebaseUser) {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          const userData: AuthUser = {
-            ...firebaseUser,
-            displayName: firebaseUser.displayName,
-            accountType: undefined,
-          };
-  
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            userData.accountType = data?.accountType;
-            userData.phoneNumber = data?.phoneNumber;
-          }
-          setUser(userData);
-  
-        } else {
-          setUser(null);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        const userData: AuthUser = {
+          ...firebaseUser,
+          displayName: firebaseUser.displayName,
+          accountType: undefined,
+        };
+
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          userData.accountType = data?.accountType;
+          userData.phoneNumber = data?.phoneNumber;
         }
-        setLoading(false);
-      });
-      return unsubscribe;
-    }
+        setUser(userData);
 
-    const unsubscribePromise = processAuth();
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
 
-    return () => {
-      unsubscribePromise.then(unsubscribe => unsubscribe && unsubscribe());
-    };
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
