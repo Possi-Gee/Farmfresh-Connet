@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -17,19 +17,21 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     if (user?.accountType === 'farmer' && user.uid) {
-      const fetchListings = async () => {
-        try {
-          setLoadingStats(true);
-          const q = query(collection(db, "listings"), where("farmerId", "==", user.uid));
-          const querySnapshot = await getDocs(q);
-          setListingCount(querySnapshot.size);
-        } catch (error) {
-          console.error("Error fetching listings count:", error);
-        } finally {
-          setLoadingStats(false);
-        }
-      };
-      fetchListings();
+      setLoadingStats(true);
+      const q = query(collection(db, "listings"), where("farmerId", "==", user.uid));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setListingCount(querySnapshot.size);
+        setLoadingStats(false);
+      }, (error) => {
+        console.error("Error fetching listings count:", error);
+        setLoadingStats(false);
+      });
+
+      // Cleanup subscription on component unmount
+      return () => unsubscribe();
+    } else {
+      setLoadingStats(false);
     }
   }, [user]);
 

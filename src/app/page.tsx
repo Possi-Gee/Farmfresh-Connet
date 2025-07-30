@@ -2,12 +2,9 @@ import { ProductCard } from "@/components/ProductCard";
 import { FilterSidebar } from "@/components/FilterSidebar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { collection, getDocs, query, orderBy, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-// Mock data for produce listings - now empty
-const produce = [];
-
-// This type definition is kept to avoid breaking other components that might rely on it.
-// In a real application, this would likely come from a shared types file.
 export type Produce = {
     id: string;
     name: string;
@@ -21,8 +18,33 @@ export type Produce = {
     hint: string;
 };
 
+async function getProduce(): Promise<Produce[]> {
+  const listingsCol = collection(db, 'listings');
+  const q = query(listingsCol, orderBy('createdAt', 'desc'));
+  const listingsSnapshot = await getDocs(q);
+  const produceList: Produce[] = [];
+  listingsSnapshot.forEach((doc: DocumentData) => {
+    const data = doc.data();
+    produceList.push({
+      id: doc.id,
+      name: data.productName,
+      category: data.category,
+      price: data.price,
+      unit: data.unit,
+      quantity: data.quantity,
+      location: data.location,
+      imageUrl: data.imageUrl,
+      farmer: data.farmerName || 'Anonymous Farmer',
+      hint: data.productName.toLowerCase(), // Use product name for hint
+    });
+  });
+  return produceList;
+}
 
-export default function Home() {
+
+export default async function Home() {
+  const produce = await getProduce();
+
   return (
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

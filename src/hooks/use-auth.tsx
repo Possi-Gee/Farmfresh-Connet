@@ -8,6 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 interface AuthUser extends User {
   accountType?: 'farmer' | 'buyer';
+  displayName: string | null;
 }
 
 interface AuthContextType {
@@ -28,11 +29,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDoc = await getDoc(userDocRef);
+        
+        const userData: AuthUser = {
+          ...firebaseUser,
+          displayName: firebaseUser.displayName,
+          accountType: undefined,
+        };
+
         if (userDoc.exists()) {
-          setUser({ ...firebaseUser, accountType: userDoc.data()?.accountType });
-        } else {
-          setUser(firebaseUser);
+          userData.accountType = userDoc.data()?.accountType;
         }
+        setUser(userData);
+
       } else {
         setUser(null);
       }
