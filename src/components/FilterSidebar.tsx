@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,16 +9,32 @@ import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 
 const regions = [
-  "Ashanti", "Bono", "Bono East", "Ahafo", "Central", "Eastern",
+  "all", "Ashanti", "Bono", "Bono East", "Ahafo", "Central", "Eastern",
   "Greater Accra", "Northern", "Savannah", "North East", "Upper East",
   "Upper West", "Volta", "Oti", "Western", "Western North"
 ];
 
 const categories = [
-  "All", "Vegetables", "Fruits", "Grains", "Tubers", "Spices"
+  "All", "Vegetables", "Fruits", "Grains", "Tubers", "Spices", "Other"
 ];
 
-export function FilterSidebar() {
+interface FilterSidebarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  category: string;
+  setCategory: (value: string) => void;
+  region: string;
+  setRegion: (value: string) => void;
+}
+
+export function FilterSidebar({
+  searchTerm,
+  setSearchTerm,
+  category,
+  setCategory,
+  region,
+  setRegion
+}: FilterSidebarProps) {
   return (
     <Card className="sticky top-20">
       <CardHeader>
@@ -25,39 +42,44 @@ export function FilterSidebar() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="crop-type">Crop Type</Label>
-          <Input id="crop-type" placeholder="e.g. Tomato, Mango..." />
+          <Label htmlFor="crop-type">Search by Name</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              id="crop-type" 
+              placeholder="e.g. Tomato, Mango..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
-          <Select>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger id="category">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category.toLowerCase()}>{category}</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat.toLowerCase()}>{cat}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="region">Region</Label>
-          <Select>
+          <Select value={region} onValueChange={setRegion}>
             <SelectTrigger id="region">
               <SelectValue placeholder="Select a region" />
             </SelectTrigger>
             <SelectContent>
-              {regions.map((region) => (
-                <SelectItem key={region} value={region}>{region}</SelectItem>
+              {regions.map((reg) => (
+                <SelectItem key={reg} value={reg}>{reg === 'all' ? 'All Regions' : reg}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <Button className="w-full">
-          <Search className="mr-2 h-4 w-4" />
-          Search
-        </Button>
       </CardContent>
     </Card>
   );
