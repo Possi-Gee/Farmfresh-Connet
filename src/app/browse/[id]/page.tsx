@@ -40,7 +40,7 @@ async function getProduceById(id: string): Promise<Produce | null> {
 }
 
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params: {id} }: { params: { id: string } }) {
     const [product, setProduct] = useState<Produce | null>(null);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
@@ -50,12 +50,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     useEffect(() => {
         const fetchProduct = async () => {
             setLoading(true);
-            const productData = await getProduceById(params.id);
+            const productData = await getProduceById(id);
             setProduct(productData);
             setLoading(false);
         }
         fetchProduct();
-    }, [params.id]);
+    }, [id]);
 
     const handleAddToCart = async () => {
         if (!user) {
@@ -176,5 +176,3 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
     );
 }
-
-    
