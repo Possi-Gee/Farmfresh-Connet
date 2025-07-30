@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Truck } from "lucide-react";
+import { MoreHorizontal, Truck, CheckCircle } from "lucide-react";
 
 interface OrderItem {
     productName: string;
@@ -139,7 +139,7 @@ export default function FarmerOrdersPage() {
                                                     Mark as Shipped
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "Delivered")}>
-                                                     <Badge className="mr-2 h-4 w-4" />
+                                                     <CheckCircle className="mr-2 h-4 w-4" />
                                                     Mark as Delivered
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
