@@ -9,6 +9,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 export const metadata: Metadata = {
   title: 'FarmFresh Connect',
   description: 'Connecting farmers with potential buyers.',
+  manifest: '/manifest.json'
 };
 
 export default function RootLayout({
@@ -22,6 +23,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+        <meta name="theme-color" content="#a3b899" />
       </head>
       <body className={cn(
           "min-h-screen bg-background font-body antialiased",
