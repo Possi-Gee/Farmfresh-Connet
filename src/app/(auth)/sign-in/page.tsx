@@ -8,7 +8,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
-          <CardDescription>Sign in to your FarmFresh Connect account.</CardDescription>
+          <CardDescription>Sign in to your HarvestHub account.</CardDescription>
         </CardHeader>
         <CardContent>
           <SignInForm />

@@ -47,7 +47,7 @@ export default function CompleteProfilePage() {
                 fullName: user.displayName,
             }, { merge: true });
 
-            toast({ title: "Profile Complete!", description: "Welcome to FarmFresh Connect!" });
+            toast({ title: "Profile Complete!", description: "Welcome to HarvestHub!" });
             
             // Force a reload of the auth state to get the new accountType
             window.location.href = "/dashboard";

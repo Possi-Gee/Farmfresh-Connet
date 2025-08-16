@@ -121,7 +121,7 @@ export function SiteHeader() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Leaf className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline sm:inline-block">
-              FarmFresh Connect
+              HarvestHub
             </span>
           </Link>
         </div>
@@ -147,7 +147,7 @@ export function SiteHeader() {
                 <SheetTitle className="flex items-center">
                   <Link href="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
                     <Leaf className="mr-2 h-6 w-6 text-primary" />
-                    <span className="font-bold">FarmFresh Connect</span>
+                    <span className="font-bold">HarvestHub</span>
                   </Link>
                 </SheetTitle>
               </SheetHeader>

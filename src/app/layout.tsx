@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
-  title: 'FarmFresh Connect',
+  title: 'HarvestHub',
   description: 'Connecting farmers with potential buyers.',
   manifest: '/manifest.json'
 };
