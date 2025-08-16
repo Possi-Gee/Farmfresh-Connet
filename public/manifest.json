@@ -1,21 +1,21 @@
 {
-  "name": "FarmFresh Connect",
-  "short_name": "FarmFresh",
-  "description": "Connecting farmers with potential buyers.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#F5F5DC",
-  "theme_color": "#8FBC8F",
-  "icons": [
-    {
-      "src": "https://storage.googleapis.com/maker-studio-project-files-prod/OOK_image_z0_9P0cW81Zg-s8PzR1nZ0X5-p_v_1717013348169_0.jpg",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://storage.googleapis.com/maker-studio-project-files-prod/OOK_image_z0_9P0cW81Zg-s8PzR1nZ0X5-p_v_1717013348169_0.jpg",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "FarmFresh Connect",
+    "short_name": "FarmFresh",
+    "description": "Connecting farmers with potential buyers.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1a1a",
+    "theme_color": "#2BAE4B",
+    "icons": [
+        {
+            "src": "https://firebasestudio.page.link/omPLpCwhDxRgcoY67.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://firebasestudio.page.link/omPLpCwhDxRgcoY67.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
 }
